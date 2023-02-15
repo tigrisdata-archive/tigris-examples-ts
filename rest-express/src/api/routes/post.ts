@@ -35,8 +35,9 @@ export default (app: Router, db: DB) => {
       let createdPost: Post;
       db.transact(async (tx) => {
         const user = await userCollection.findOne(
-          { email: authorEmail },
-          undefined,
+          {
+            filter: { email: authorEmail },
+          },
           tx
         );
         if (user === undefined) {
@@ -51,8 +52,6 @@ export default (app: Router, db: DB) => {
             title: title,
             content: content,
             authorId: user.id,
-            published: false,
-            viewCount: 0,
           },
           tx
         );
@@ -73,7 +72,9 @@ export default (app: Router, db: DB) => {
     const { id } = req.params;
 
     try {
-      const query = { id: BigInt(id) };
+      const query = {
+        filter: { id: BigInt(id) },
+      };
       const post = await postCollection.findOne(query);
 
       if (post === undefined) {
@@ -93,7 +94,9 @@ export default (app: Router, db: DB) => {
     const { id } = req.params;
 
     try {
-      const result = await postCollection.deleteOne({ id: BigInt(id) });
+      const result = await postCollection.deleteOne({
+        filter: { id: BigInt(id) },
+      });
 
       if (!result?.status) {
         throw new APIError(
@@ -111,34 +114,23 @@ export default (app: Router, db: DB) => {
   app.put("/post/:id/views", async (req, res, next) => {
     const { id } = req.params;
 
-    let post: Post;
-    db.transact(async (tx) => {
-      const query = { id: BigInt(id) };
-      post = await postCollection.findOne(query, undefined, tx);
+    try {
+      const result = await postCollection.updateOne({
+        filter: { id: BigInt(id) },
+        fields: { $increment: { viewCount: 1 } },
+      });
 
-      if (post === undefined) {
+      if (!result?.modifiedCount) {
         throw new APIError(
           HttpStatusCode.NOT_FOUND,
           `Post with ID ${id} does not exist in the database`
         );
       }
 
-      post.viewCount += 1;
-      const result = await postCollection.updateOne(
-        { id: post.id },
-        { viewCount: post.viewCount },
-        tx
-      );
-
-      if (!result?.modifiedCount) {
-        throw new APIError(
-          HttpStatusCode.INTERNAL_SERVER,
-          `Failed to update post views: ${result}`
-        );
-      }
-    })
-      .then(() => res.json({ post: post }))
-      .catch((error) => next(error));
+      res.status(200).json({ updated: true });
+    } catch (error) {
+      next(error);
+    }
   });
 
   app.put("/post/:id/publish", async (req, res, next) => {
@@ -146,8 +138,10 @@ export default (app: Router, db: DB) => {
 
     let post: Post;
     db.transact(async (tx) => {
-      const query = { id: BigInt(id) };
-      post = await postCollection.findOne(query, undefined, tx);
+      const query = {
+        filter: { id: BigInt(id) },
+      };
+      post = await postCollection.findOne(query, tx);
 
       if (post === undefined) {
         throw new APIError(
@@ -158,8 +152,10 @@ export default (app: Router, db: DB) => {
 
       post.published = !post.published;
       const result = await postCollection.updateOne(
-        { id: post.id },
-        { published: post.published },
+        {
+          filter: { id: post.id },
+          fields: { published: post.published },
+        },
         tx
       );
 

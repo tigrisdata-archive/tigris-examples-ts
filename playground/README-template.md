@@ -83,8 +83,8 @@ import {
 
 @TigrisCollection("user")
 export class User {
-  @PrimaryKey(TigrisDataTypes.INT64, { order: 1, autoGenerate: true })
-  id?: bigint;
+  @PrimaryKey(TigrisDataTypes.UUID, { order: 1, autoGenerate: true })
+  id?: string;
 
   @Field()
   email: string;

@@ -113,25 +113,25 @@ The first step is to extend the `movie` search model:
 ```diff
 // ./src/search/models/movie.ts
 
-import { IndexField, TigrisDataTypes, TigrisIndex } from "@tigrisdata/core";
+import { SearchField, TigrisDataTypes, TigrisSearchIndex } from "@tigrisdata/core";
 
 export const MOVIE_INDEX_NAME = "movie";
 
-@TigrisIndex(MOVIE_INDEX_NAME)
+@TigrisSearchIndex(MOVIE_INDEX_NAME)
 export class Movie {
-  @IndexField({ sort: true })
+  @SearchField({ sort: true })
   title: string;
 
-  @IndexField({ sort: true, facet: true })
+  @SearchField({ sort: true, facet: true })
   year: number;
 
-  @IndexField({ elements: TigrisDataTypes.STRING, facet: true })
+  @SearchField({ elements: TigrisDataTypes.STRING, facet: true })
   cast: string[];
 
-  @IndexField({ elements: TigrisDataTypes.STRING, facet: true })
+  @SearchField({ elements: TigrisDataTypes.STRING, facet: true })
   genre: string[];
 +
-+  @IndexField({ elements: TigrisDataTypes.STRING, facet: true })
++  @SearchField({ elements: TigrisDataTypes.STRING, facet: true })
 +  tags: string[];
 }
 ```

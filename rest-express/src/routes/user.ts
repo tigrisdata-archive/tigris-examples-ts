@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { DB } from "@tigrisdata/core";
-import { User } from "../../db/models/user";
-import { Post } from "../../db/models/post";
+import { User } from "../db/models/user";
+import { Post } from "../db/models/post";
 
 export default (app: Router, db: DB) => {
   const userCollection = db.getCollection<User>(User);

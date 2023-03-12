@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { z } from "zod";
 import { DB } from "@tigrisdata/core";
-import { User } from "../../db/models/user";
-import { Post } from "../../db/models/post";
-import middlewares from "../middlewares";
-import { APIError, HttpStatusCode } from "../../utils/errors";
+import { User } from "../db/models/user";
+import { Post } from "../db/models/post";
+import middlewares from "../utils/middlewares";
+import { APIError, HttpStatusCode } from "../utils/errors";
 
 const apiSchema = z.object({
   body: z.object({

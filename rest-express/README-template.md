@@ -66,7 +66,7 @@ We suggest that you begin by typing:
 npm run dev
 ```
 
-The server is now running on `http://localhost:3000`. You can now run the API requests, e.g. [`http://localhost:3000/api/users`](http://localhost:3000/api/users).
+The server is now running on `http://localhost:3000`. You can now run the API requests, e.g. [`http://localhost:3000/users`](http://localhost:3000/users).
 
 ## Using the REST API
 
@@ -74,24 +74,24 @@ You can access the REST API of the server using the following endpoints:
 
 ### `GET`
 
-- `/api/users`: Fetch all users
-- `/api/post/:id`: Fetch a single post by its `id`
-- `/api/search?searchString={searchString}&page={page}&size={size}&orderBy={orderBy}`: Fetch all _published_ posts
+- `/users`: Fetch all users
+- `/post/:id`: Fetch a single post by its `id`
+- `/search?searchString={searchString}&page={page}&size={size}&orderBy={orderBy}`: Fetch all _published_ posts
   - Query Parameters
     - `searchString` (required): This filters posts by `title` or `content`
     - `size` (optional): This specifies how many posts should be returned in the result
     - `page` (optional): This specifies the page number to be returned when there are more than one page of search results
     - `orderBy` (optional): The sort order for posts in either ascending or descending order. The value can either `asc` or `desc`
-- `/api/user/:id/drafts`: Fetch user's drafts by their `id`
+- `/user/:id/drafts`: Fetch user's drafts by their `id`
 
 ### `POST`
 
-- `/api/signup`: Create a new user
+- `/signup`: Create a new user
   - Body:
     - `email: String` (required): The email address of the user
     - `name: String` (required): The name of the user
     - `postData: Post[]` (optional): The posts of the user
-- `/api/post`: Create a new post
+- `/post`: Create a new post
   - Body:
     - `title: String` (required): The title of the post
     - `content: String` (required): The content of the post
@@ -99,12 +99,12 @@ You can access the REST API of the server using the following endpoints:
 
 ### `PUT`
 
-- `/api/post/:id/publish`: Toggle the publish value of a post by its `id`
-- `/api/post/:id/views`: Increases the `viewCount` of a `Post` by one `id`
+- `/post/:id/publish`: Toggle the publish value of a post by its `id`
+- `/post/:id/views`: Increases the `viewCount` of a `Post` by one `id`
 
 ### `DELETE`
 
-- `/api/post/:id`: Delete a post by its `id`
+- `/post/:id`: Delete a post by its `id`
 
 ## Evolving the app
 
@@ -155,7 +155,7 @@ You can now update the API endpoints to use the new `bio` field in the
 
 #### 2.1 Add the API endpoint to your app
 
-Update your `./src/api/routes/user.ts` file by adding a new endpoint to your
+Update your `./src/routes/user.ts` file by adding a new endpoint to your
 API:
 
 ```ts
@@ -201,7 +201,7 @@ Restart your application server and test out your new endpoint.
 
 ##### `POST`
 
-- `/api/user/:id/profile`: Create a new profile based on the user id
+- `/user/:id/profile`: Create a new profile based on the user id
   - Body:
     - `bio: String` : The bio of the user
 

@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { z } from "zod";
-import { DB, Order, SearchQuery } from "@tigrisdata/core";
-import { Post } from "../../db/models/post";
-import middlewares from "../middlewares";
+import { DB, Order } from "@tigrisdata/core";
+import { SearchQuery } from "@tigrisdata/core/dist/search";
+import { Post } from "../db/models/post";
+import middlewares from "../utils/middlewares";
 
 const apiSchema = z.object({
   query: z.object({

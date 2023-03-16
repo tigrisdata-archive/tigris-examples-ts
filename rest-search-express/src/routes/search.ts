@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { Search } from "@tigrisdata/core";
-import { SearchQuery } from "@tigrisdata/core/dist/search";
+import { Search, SearchQuery } from '@tigrisdata/core'
 import middlewares from "../utils/middlewares";
 import { Movie, MOVIE_INDEX_NAME } from "../search/models/movie";
 

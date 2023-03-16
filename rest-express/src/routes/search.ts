@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { DB } from "@tigrisdata/core";
-import { SearchQuery } from "@tigrisdata/core/dist/search";
+import { DB, SearchQuery } from '@tigrisdata/core'
 import { Post } from "../db/models/post";
 import middlewares from "../utils/middlewares";
 

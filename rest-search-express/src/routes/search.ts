@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { Order, Search } from "@tigrisdata/core";
-import { SearchQuery } from "@tigrisdata/core/dist/search";
+import { Search, SearchQuery } from '@tigrisdata/core'
 import middlewares from "../utils/middlewares";
 import { Movie, MOVIE_INDEX_NAME } from "../search/models/movie";
 
@@ -34,8 +33,8 @@ export default (app: Router, searchClient: Search) => {
             field: "year",
             order:
               orderBy?.toString().toLowerCase() == "asc"
-                ? Order.ASC
-                : Order.DESC,
+                ? "$asc"
+                : "$desc",
           },
         ],
         hitsPerPage: Number(size) || 10,

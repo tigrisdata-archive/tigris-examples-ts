@@ -1,6 +1,7 @@
 import {
   Field,
   PrimaryKey,
+  SearchField,
   TigrisCollection,
   TigrisDataTypes,
 } from "@tigrisdata/core";
@@ -13,15 +14,19 @@ export class Post {
   @Field({ timestamp: "createdAt" })
   createdAt?: Date;
 
+  @SearchField()
   @Field({ timestamp: "updatedAt" })
   updatedAt?: Date;
 
+  @SearchField()
   @Field()
   title: string;
 
+  @SearchField()
   @Field()
   content?: string;
 
+  @SearchField()
   @Field({ default: false })
   published?: boolean;
 

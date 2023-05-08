@@ -1,21 +1,18 @@
 {
-  "name": "mysearchapp",
+  "name": "vectorsearchapp",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "clean": "rimraf ./dist",
-    "setup": "npx ts-node scripts/setup.ts",
     "seed": "npx ts-node scripts/seed.ts",
     "prebuild": "npm run clean && npm install",
     "build": "npx tsc",
-    "postbuild": "npm run setup",
     "prestart": "npm run build",
     "start": "node dist/index.js",
-    "predev": "npm run setup",
     "dev": "npx nodemon"
   },
   "dependencies": {
-    "@tigrisdata/core": "^1.0.0-beta.43",
+    "@tigrisdata/vector": "latest",
     "csv-parse": "^5.3.6",
     "dotenv": "^16.0.3",
     "express": "4.18.2",

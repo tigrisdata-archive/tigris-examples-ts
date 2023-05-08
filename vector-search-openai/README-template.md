@@ -30,7 +30,7 @@ Initializing project with template: vector-search-openai
 Using npm.
 
 Installing dependencies:
-- @tigrisdata/core: 1.0.0-beta.43
+- @tigrisdata/vector: 1.0.0-beta.3
 - express: 4.18.2
 - openai: 3.2.1
 
@@ -108,14 +108,12 @@ You can access the REST API of the server using the following endpoints:
 
 ### `GET`
 
-- `/search?searchString={searchString}&page={page}&size={size}&orderBy={orderBy}`: Fetch all movies
+- `/search?searchString={searchString}&k={k}`: Fetch all movies
   - Query Parameters
     - `searchString` (required): This specifies the search string that is used
       to fetch the relevant documents from the search index
-    - `size` (optional): This specifies how many movies should be returned in
+    - `k` (optional): This specifies how many movies should be returned in
       the result
-    - `page` (optional): This specifies the page number to be returned when
-      there are more than one page of search results
 
 ## Next steps
 

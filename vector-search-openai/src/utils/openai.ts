@@ -1,5 +1,4 @@
-import { Configuration, OpenAIApi } from "openai";
-import { Review } from "search/models/review";
+import { Configuration, CreateEmbeddingResponse, OpenAIApi } from "openai";
 
 const MODEL = "text-embedding-ada-002";
 
@@ -23,4 +22,15 @@ const createEmbedding = async (
   return embeddings.data.data[0]?.embedding;
 };
 
-export { getOpenaiClient, createEmbedding };
+const createEmbeddings = async (
+  openai: OpenAIApi,
+  input: string[]
+): Promise<CreateEmbeddingResponse> => {
+  const embeddings = await openai.createEmbedding({
+    model: MODEL,
+    input: input,
+  });
+  return embeddings.data;
+};
+
+export { getOpenaiClient, createEmbedding, createEmbeddings };

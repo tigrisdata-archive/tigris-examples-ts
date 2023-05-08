@@ -4,31 +4,49 @@ dotenv.config();
 import fs from "fs";
 import { parse } from "csv-parse";
 import { clearInterval } from "timers";
-import { Review, REVIEW_INDEX_NAME } from "../src/search/models/review";
-import { Tigris } from "@tigrisdata/core";
-import { SearchIndex } from "@tigrisdata/core";
-import { createEmbedding, getOpenaiClient } from "../src/utils/openai";
+import { VectorDocumentStore, Document } from "@tigrisdata/vector";
+import { createEmbeddings, getOpenaiClient } from "../src/utils/openai";
+import { OpenAIApi } from "openai";
+
+interface Review {
+  Id: string;
+  ProductId: string;
+  UserId: string;
+  ProfileName: string;
+  HelpfulnessNumerator: number;
+  HelpfulnessDenominator: number;
+  Score: number;
+  Time: number;
+  Summary: string;
+  Text: string;
+}
+
+const BATCH_SIZE = 100;
 
 async function main() {
   // setup Tigris client
-  const tigrisClient = new Tigris();
-  const search = tigrisClient.getSearch();
-  await search.createOrUpdateIndex(Review);
+  const vectorDocStore = new VectorDocumentStore({
+    connection: {
+      serverUrl: process.env.TIGRIS_URI,
+      projectName: process.env.TIGRIS_PROJECT,
+      clientId: process.env.TIGRIS_CLIENT_ID,
+      clientSecret: process.env.TIGRIS_CLIENT_SECRET,
+    },
+    indexName: "reviews",
+    numDimensions: 1536, // 1536 floats total for ada-002
+  });
 
   // load seed data
-  const index = await search.getIndex<Review>(REVIEW_INDEX_NAME);
-
   const dataFile = "./scripts/data/reviews.csv";
   console.log("Seeding data from file ", dataFile);
 
   const inputStream = fs.createReadStream(dataFile);
-
-  await importJSON(inputStream, index);
+  await importJSON(inputStream, vectorDocStore);
 }
 
 async function importJSON(
   readStream: fs.ReadStream,
-  index: SearchIndex<Review>
+  store: VectorDocumentStore
 ) {
   const loader = loadingAnimation("Loading...");
 
@@ -36,49 +54,68 @@ async function importJSON(
   const openai = getOpenaiClient();
 
   let numDocsLoaded = 0;
-  const batchSize = 100;
-  const batch: Review[] = [];
 
-  for await (const doc of readStream.pipe(
-    parse({ columns: true, cast: true })
-  )) {
-    if (batch.length >= batchSize) {
-      await insertBatch(batch, index);
+  const ids: string[] = [];
+  const documents: Document[] = [];
+  const contents: string[] = [];
+  for await (let doc of readStream.pipe(parse({ columns: true, cast: true }))) {
+    doc = doc as Review;
 
-      numDocsLoaded += batch.length;
-      batch.length = 0;
-    } else {
-      const embeddings = await createEmbedding(
-        openai,
-        `${doc.Summary} ${doc.Text}`
-      );
-      doc.vector = embeddings;
+    ids.push(`${doc.Id}`);
+    documents.push({
+      content: doc.Text,
+      metadata: {
+        ProductId: doc.ProductId,
+        UserId: doc.UserId,
+        ProfileName: doc.ProfileName,
+        HelpfulnessNumerator: doc.HelpfulnessNumerator,
+        HelpfulnessDenominator: doc.HelpfulnessDenominator,
+        Score: doc.Score,
+        Time: doc.Time,
+        Summary: doc.Summary,
+      },
+    });
 
-      batch.push(doc as Review);
+    contents.push(`${doc.Summary} ${doc.Text}`);
+
+    if (documents.length >= BATCH_SIZE) {
+      await storeDocuments(ids, documents, contents, store, openai);
+
+      numDocsLoaded += documents.length;
+      ids.length = 0;
+      documents.length = 0;
+      contents.length = 0;
     }
   }
 
-  if (batch.length > 0) {
-    await insertBatch(batch, index);
+  if (documents.length >= BATCH_SIZE) {
+    await storeDocuments(ids, documents, contents, store, openai);
 
-    numDocsLoaded += batch.length;
-    batch.length = 0;
+    numDocsLoaded += documents.length;
+    ids.length = 0;
+    documents.length = 0;
+    contents.length = 0;
   }
 
   clearInterval(loader);
   console.log(`Seeding successful with ${numDocsLoaded} docs ...`);
 }
 
-async function insertBatch(batch: Review[], index: SearchIndex<Review>) {
-  const docStatus = await index.createOrReplaceMany(batch);
-  for (const status of docStatus) {
-    if (status.error) {
-      console.log(status.error);
-      console.log(batch);
+async function storeDocuments(
+  ids: string[],
+  documents: Document[],
+  contents: string[],
+  store: VectorDocumentStore,
+  openai: OpenAIApi
+) {
+  const embeddingsResponse = await createEmbeddings(openai, contents);
+  const embeddings = embeddingsResponse.data.map((e) => e.embedding);
 
-      throw new Error("Error creating documents");
-    }
-  }
+  await store.addDocumentsWithVectors({
+    ids,
+    embeddings,
+    documents,
+  });
 }
 
 /**
